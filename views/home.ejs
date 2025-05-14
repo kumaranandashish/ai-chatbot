@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+    <div
+        class="chat-container w-full max-w-[1024px] bg-white shadow-lg rounded-2xl overflow-hidden flex flex-col h-[98vh]">
+
+        <div class="chat-header bg-blue-600 text-white p-4 flex items-center gap-3 text-xl font-semibold">
+            Chat with AI
+        </div>
+
+        <div id="message-container" class="message-container flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50">
+            <!-- Messages will go here -->
+        </div>
+
+        <div class="input-container p-4 bg-white border-t flex items-center gap-2">
+            <input type="text" id="input-box" placeholder="Type your message..."
+                class="input-box flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button id="send-button"
+                class="send-button bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition">Send</button>
+        </div>
+
+    </div>
+
+
+    <script>
+        const messageContainer = document.getElementById('message-container');
+        const inputBox = document.getElementById('input-box');
+        const sendButton = document.getElementById('send-button');
+
+        function addMessage(sender, text, isUser = false) {
+            const message = document.createElement('div');
+            message.classList.add('message');
+            if (isUser) {
+                message.classList.add('user');
+            }
+
+            const senderElement = document.createElement('span');
+            senderElement.classList.add('sender');
+            senderElement.textContent = isUser ? 'You: ' : 'AI: ';
+
+            const textElement = document.createElement('span');
+            textElement.classList.add('text');
+            textElement.textContent = text;
+
+            message.appendChild(senderElement);
+            message.appendChild(textElement);
+            messageContainer.appendChild(message);
+
+            // Scroll to bottom to show the latest message
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+
+        function showLoadingAnimation() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.classList.add('message', 'ai-message');
+            loadingDiv.innerHTML = `<span class="sender">AI:</span><span class="text loading-animation"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
+            messageContainer.appendChild(loadingDiv);
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+
+        function removeLoadingAnimation() {
+            const loadingDiv = messageContainer.querySelector('.loading-animation');
+            if (loadingDiv) {
+                loadingDiv.parentElement.remove();
+            }
+        }
+
+        sendButton.addEventListener('click', () => {
+            const messageText = inputBox.value.trim();
+            if (messageText === '') return;
+
+            addMessage('You', messageText, true);
+            inputBox.value = '';
+            showLoadingAnimation();
+
+            // Simulate AI response after a short delay
+            setTimeout(() => {
+                removeLoadingAnimation();
+                const aiResponse = "This is a simulated response from the AI chatbot.";
+                addMessage('AI', aiResponse);
+            }, 2000); // 2-second delay
+        });
+
+        inputBox.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                sendButton.click();
+            }
+        });
+    </script>
+</body>
+
+</html>
