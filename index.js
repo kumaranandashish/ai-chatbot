@@ -34,7 +34,7 @@ app.post("/chat", async (req, res) => {
 
         const response = aiResponse.text;
 
-        res.status(200).json({ response: response}).end();
+        res.status(200).json({ reply: response}).end();
     } catch (error) {
         console.log("Error in generaring ai response:", error);
         res.status(500).json({ message: "Something went wrong, try again later."})

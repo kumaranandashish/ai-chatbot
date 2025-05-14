@@ -43,31 +43,33 @@
 
         function addMessage(sender, text, isUser = false) {
             const message = document.createElement('div');
-            message.classList.add('message');
-            if (isUser) {
-                message.classList.add('user');
-            }
+            message.classList.add('message', 'p-2', 'rounded-lg', 'max-w-[75%]', 'break-words');
+            // message.classList.add(isUser ? 'bg-blue-100 self-end text-right ml-auto' : 'bg-gray-200 self-start');
 
             const senderElement = document.createElement('span');
-            senderElement.classList.add('sender');
-            senderElement.textContent = isUser ? 'You: ' : 'AI: ';
+            senderElement.classList.add('block', 'text-sm', 'font-semibold', 'text-gray-600', 'mb-1');
+            senderElement.textContent = isUser ? 'You:' : 'AI:';
 
             const textElement = document.createElement('span');
-            textElement.classList.add('text');
+            textElement.classList.add('block', 'text-base', 'text-gray-800');
             textElement.textContent = text;
 
             message.appendChild(senderElement);
             message.appendChild(textElement);
             messageContainer.appendChild(message);
-
-            // Scroll to bottom to show the latest message
             messageContainer.scrollTop = messageContainer.scrollHeight;
         }
 
         function showLoadingAnimation() {
             const loadingDiv = document.createElement('div');
-            loadingDiv.classList.add('message', 'ai-message');
-            loadingDiv.innerHTML = `<span class="sender">AI:</span><span class="text loading-animation"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
+            loadingDiv.classList.add('message', 'ai-message', 'bg-gray-200', 'p-2', 'rounded-lg', 'max-w-[75%]');
+            loadingDiv.innerHTML = `
+            <span class="block text-sm font-semibold text-gray-600 mb-1">AI:</span>
+            <span class="text loading-animation flex gap-1">
+                <span class="dot w-2 h-2 bg-gray-500 rounded-full animate-bounce"></span>
+                <span class="dot w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-200"></span>
+                <span class="dot w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-400"></span>
+            </span>`;
             messageContainer.appendChild(loadingDiv);
             messageContainer.scrollTop = messageContainer.scrollHeight;
         }
@@ -79,7 +81,7 @@
             }
         }
 
-        sendButton.addEventListener('click', () => {
+        async function handleSend() {
             const messageText = inputBox.value.trim();
             if (messageText === '') return;
 
@@ -87,20 +89,37 @@
             inputBox.value = '';
             showLoadingAnimation();
 
-            // Simulate AI response after a short delay
-            setTimeout(() => {
-                removeLoadingAnimation();
-                const aiResponse = "This is a simulated response from the AI chatbot.";
-                addMessage('AI', aiResponse);
-            }, 2000); // 2-second delay
-        });
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: messageText }),
+                });
 
+                const data = await response.json();
+                removeLoadingAnimation();
+                if (data && data.reply) {
+                    addMessage('AI', data.reply);
+                } else {
+                    addMessage('AI', 'Something went wrong. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                removeLoadingAnimation();
+                addMessage('AI', 'Error connecting to server.');
+            }
+        }
+
+        sendButton.addEventListener('click', handleSend);
         inputBox.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
-                sendButton.click();
+                handleSend();
             }
         });
     </script>
+
 </body>
 
 </html>
